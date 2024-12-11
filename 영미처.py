@@ -981,11 +981,30 @@ class ImageEditor(QMainWindow):
 
     #이미지 저장
     def save_image(self):
-        file_path, _ = QFileDialog.getSaveFileName(self, "이미지 저장", "", "Images (*.png *.jpg *.jpeg *.bmp)")
-        if file_path:
-            success = cv2.imwrite(file_path, self.image)
-            if not success:
-                QMessageBox.critical(self, "오류", "이미지를 저장할 수 없습니다.")
+        if self.image is not None:
+            # 이미지를 저장하기 전에 업데이트된 self.image 확인
+            file_path, selected_filter = QFileDialog.getSaveFileName(
+                self, 
+                "이미지 저장", 
+                "", 
+                "PNG 파일 (*.png);;JPEG 파일 (*.jpg *.jpeg);;BMP 파일 (*.bmp)"
+            )
+            
+            if file_path:
+                # 확장자 자동으로 추가
+                if not any(file_path.endswith(ext) for ext in [".png", ".jpg", ".jpeg", ".bmp"]):
+                    if selected_filter == "PNG 파일 (*.png)":
+                        file_path += ".png"
+                    elif selected_filter == "JPEG 파일 (*.jpg *.jpeg)":
+                        file_path += ".jpg"
+                    elif selected_filter == "BMP 파일 (*.bmp)":
+                        file_path += ".bmp"
+
+                success = cv2.imwrite(file_path, self.image)
+                if not success:
+                    QMessageBox.critical(self, "오류", "이미지를 저장할 수 없습니다.")
+        else:
+            QMessageBox.critical(self, "오류", "저장할 이미지가 없습니다.")
 
     def show_about_popup(self):
         dialog = QDialog(self)
